@@ -100,9 +100,9 @@ private:
 class ReprojectionCostFunction {
 
 public:
-	ReprojectionCostFunction(const Eigen::Vector2d& feature2D)
-		: feature2D_(feature2D)
-	{}
+    ReprojectionCostFunction(const Eigen::Vector2d& feature2D)
+        : feature2D_(feature2D)
+    {}
 
     static ceres::CostFunction* Create(const Eigen::Vector2d& feature2D) {
         return (new ceres::AutoDiffCostFunction<ReprojectionCostFunction, 2, 4, 3, 3>(
@@ -126,8 +126,8 @@ public:
         projection[1] /= projection[2];
         projection[2] /= projection[2];
 
-		// Transform from meters to pixels
-		const double pixelSize = 2e-6; // meters per pixel
+        // Transform from meters to pixels
+        const double pixelSize = 2e-6; // meters per pixel
         projection[0] /= pixelSize;
         projection[1] /= pixelSize;
 
@@ -144,5 +144,5 @@ public:
     }
 
 private:
-	const Eigen::Vector2d feature2D_;
+    const Eigen::Vector2d feature2D_;
 };
