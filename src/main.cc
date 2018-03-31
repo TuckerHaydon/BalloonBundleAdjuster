@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
     auto fp = std::make_shared<FeaturePoint>(Eigen::Vector3d(0,0,0));
 
     // Intialize dummy covariance
-	const Eigen::Matrix<double, 6, 6> cov = (Eigen::Matrix<double, 6, 1>() << 0.03, 0.03, 0.03, 1e9, 1e9, 1e9).finished().asDiagonal();
+    const Eigen::Matrix<double, 6, 6> cov = (Eigen::Matrix<double, 6, 1>() << 0.03, 0.03, 0.03, 1e9, 1e9, 1e9).finished().asDiagonal();
 
     // Initialize some cameras
     Camera cam1(std::make_pair(Eigen::Vector2d(0.1, -0.03), fp),
@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
                 QuaternionInertialAwayFromCamera(M_PI, 0, M_PI/2),
                 cov);
 
-	const std::vector<Camera*> cams = {&cam1, &cam2, &cam3};
+    const std::vector<Camera*> cams = {&cam1, &cam2, &cam3};
 
     // Create a ceres problem
     ceres::Problem problem;
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
         {
             ceres::CostFunction* cost_function = 
                 CameraPoseCostFunction::Create(
-    	    	    cam->qVecPrior(), cam->tVecPrior(), cam->covPrior()
+                    cam->qVecPrior(), cam->tVecPrior(), cam->covPrior()
                 );
     
             problem.AddResidualBlock(cost_function,
