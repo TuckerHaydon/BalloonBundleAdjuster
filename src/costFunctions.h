@@ -127,7 +127,7 @@ public:
         projection[2] /= projection[2];
 
         // Transform from meters to pixels
-        const double pixelSize = 2e-6; // meters per pixel
+        const double pixelSize = 1.12e-6; // meters per pixel
         projection[0] /= pixelSize;
         projection[1] /= pixelSize;
 
@@ -136,7 +136,7 @@ public:
         residuals[1] = projection[1] - T(feature2D_(1));
 
         // Covariance of pixels. Assumed to be independent. Divide by standard deviation.
-        const T sig = T(5.0);
+        const T sig = T(20.0);
         residuals[0] /= sig;
         residuals[1] /= sig;
 

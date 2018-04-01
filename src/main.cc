@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
     std::map<std::string, PoseInfo> poseInfoMap = parsePoseInfo("../input/image_poses.txt");
     
     // Create the balloon feature point
-    auto fp = std::make_shared<FeaturePoint>(Eigen::Vector3d(3,0,0));
+    auto fp = std::make_shared<FeaturePoint>(Eigen::Vector3d(-3, 0.2, 0.6));
 
     // Initialize cameras
     std::vector< std::shared_ptr<Camera> > cams;
@@ -167,7 +167,7 @@ int main(int argc, char** argv) {
     // Solve problem
     ceres::Solver::Options options;
     options.minimizer_progress_to_stdout = true;
-    options.max_num_iterations = 500;
+    options.max_num_iterations = 10000;
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem, &summary);
     std::cout << summary.FullReport() << std::endl;
