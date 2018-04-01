@@ -6,58 +6,128 @@
 #include <utility>
 #include <ceres/ceres.h>
 #include <glog/logging.h>
+#include <map>
+#include <fstream>
 
 #include "featurePoint.h"
 #include "camera.h"
 #include "costFunctions.h"
 
 
-// Returns quaternion representation of inertial frame away from camera frame
-// Takes 3-2-1 euler angle rotation of camera away from inertial
-Eigen::Vector4d QuaternionInertialAwayFromCamera(const double roll,     // R 
-                                                 const double pitch, 
-                                                 const double yaw) {
-    const Eigen::Quaterniond q(
-        Eigen::AngleAxisd(yaw,   Eigen::Vector3d::UnitZ()) *
-        Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitY()) *
-        Eigen::AngleAxisd(roll,  Eigen::Vector3d::UnitX()));
 
-    return Eigen::Vector4d(q.w(), -q.x(), -q.y(), -q.z());
+typedef struct {
+    Eigen::Vector3d ricI;
+    Eigen::Vector3d rciC;
+    Eigen::Vector4d qIC;
+    Eigen::Matrix<double, 6, 6> P;
+} PoseInfo;
+
+Eigen::Vector4d Rot2Quat(const Eigen::Matrix<double, 3, 3> R) {
+    Eigen::Quaterniond q(R);
+    return Eigen::Vector4d(q.w(), q.x(), q.y(), q.z());
+}
+
+std::map<std::string, Eigen::Vector2d> parseBalloonInfo(const std::string& filename) {
+    
+    std::map<std::string, Eigen::Vector2d> balloonInfoMap;
+
+    std::ifstream f(filename);
+    std::string line;
+    while (getline(f, line)) {
+        std::stringstream ss(line);
+        std::string imageName;
+        Eigen::Vector2d pos;
+        
+        ss >> imageName;
+        ss >> pos(0);
+        ss >> pos(1); 
+
+        balloonInfoMap[imageName] = pos;
+    }
+
+    return balloonInfoMap;
+}
+
+std::map<std::string, PoseInfo> parsePoseInfo(const std::string& filename) {
+
+    std::map<std::string, PoseInfo> poseInfoMap;
+
+    std::ifstream f(filename);
+    std::string line;
+    while (getline(f, line)) {
+        std::stringstream ss(line);
+        std::string imageName;
+        Eigen::Vector3d ricI;
+        Eigen::Vector3d rciC;
+        Eigen::Matrix<double, 3, 3> RIC;
+        Eigen::Vector4d qIC;
+        Eigen::Matrix<double, 6, 6> P;
+        
+        ss >> imageName;
+        ss >> ricI(0) >> ricI(1) >> ricI(2);
+        ss >> rciC(0) >> rciC(1) >> rciC(2);
+    
+        // Rotation
+        for(int i = 0; i < 3; i ++) {
+            for(int j = 0; j < 3; j++) {
+                ss >> RIC(j, i);
+            }
+        }
+
+        // Covariance
+        for(int i = 0; i < 6; i++) {
+            for(int j = 0; j < 6; j++) {
+                ss >> P(j, i);
+            }
+        }
+
+        PoseInfo poseInfo;
+        poseInfo.ricI = ricI;
+        poseInfo.rciC = rciC;
+        poseInfo.qIC = Rot2Quat(RIC);
+        poseInfo.P = P;
+
+        poseInfoMap[imageName] = poseInfo;
+    }
+
+    return poseInfoMap;
 }
 
 int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
 
+    // Parse balloon info
+    std::map<std::string, Eigen::Vector2d> balloonInfoMap = parseBalloonInfo("../input/image_poses.txt");
+
+    // Parse pose info
+    std::map<std::string, PoseInfo> poseInfoMap = parsePoseInfo("../input/image_poses.txt");
     
-    // Create a feature point
-    auto fp = std::make_shared<FeaturePoint>(Eigen::Vector3d(0,0,0));
+    // Create the balloon feature point
+    auto fp = std::make_shared<FeaturePoint>(Eigen::Vector3d(3,0,0));
 
-    // Intialize dummy covariance
-    const Eigen::Matrix<double, 6, 6> cov = (Eigen::Matrix<double, 6, 1>() << 0.03, 0.03, 0.03, 1e9, 1e9, 1e9).finished().asDiagonal();
+    // Initialize cameras
+    std::vector< std::shared_ptr<Camera> > cams;
+    for (auto const& it: balloonInfoMap) {
+        const std::string imageName = it.first;
+        const Eigen::Vector2d feature = it.second;
+    
+        std::cout << imageName << std::endl;
+        PoseInfo poseInfo = poseInfoMap.at(imageName);
 
-    // Initialize some cameras
-    Camera cam1(std::make_pair(Eigen::Vector2d(0.1, -0.03), fp),
-                Eigen::Vector3d(0, 0, 1),
-                QuaternionInertialAwayFromCamera(M_PI/2, M_PI/4, -M_PI/6),
-                cov);
-
-    Camera cam2(std::make_pair(Eigen::Vector2d(0.001, 0), fp),
-                Eigen::Vector3d(0, 0, 1),
-                QuaternionInertialAwayFromCamera(0, 0, 0),
-                cov);
-
-    Camera cam3(std::make_pair(Eigen::Vector2d(-0.05, 0.03), fp),
-                Eigen::Vector3d(0, 0, 1),
-                QuaternionInertialAwayFromCamera(M_PI, 0, M_PI/2),
-                cov);
-
-    const std::vector<Camera*> cams = {&cam1, &cam2, &cam3};
+        std::shared_ptr<Camera> cam = std::make_shared<Camera>(
+            std::make_pair(feature, fp),
+            poseInfo.rciC,
+            poseInfo.qIC,
+            poseInfo.P
+        );
+        cams.push_back(cam);
+    }
 
     // Create a ceres problem
     ceres::Problem problem;
 
     // Add blocks to cost function
-    for (Camera* cam: cams) {
+    for (std::shared_ptr<Camera> cam: cams) {
         // Camera Pose
         {
             ceres::CostFunction* cost_function = 
