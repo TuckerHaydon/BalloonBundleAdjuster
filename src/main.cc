@@ -12,6 +12,8 @@
 #include "featurePoint.h"
 #include "camera.h"
 #include "costFunctions.h"
+#include "utility.h"
+#include "triangulate.h"
 
 
 
@@ -21,11 +23,6 @@ typedef struct {
     Eigen::Vector4d qIC;
     Eigen::Matrix<double, 6, 6> P;
 } PoseInfo;
-
-Eigen::Vector4d Rot2Quat(const Eigen::Matrix<double, 3, 3> R) {
-    Eigen::Quaterniond q(R);
-    return Eigen::Vector4d(q.w(), q.x(), q.y(), q.z());
-}
 
 std::map<std::string, Eigen::Vector2d> parseBalloonInfo(const std::string& filename) {
     
@@ -111,7 +108,6 @@ int main(int argc, char** argv) {
         const std::string imageName = it.first;
         const Eigen::Vector2d feature = it.second;
     
-        std::cout << imageName << std::endl;
         PoseInfo poseInfo = poseInfoMap.at(imageName);
 
         std::shared_ptr<Camera> cam = std::make_shared<Camera>(
@@ -173,6 +169,8 @@ int main(int argc, char** argv) {
     std::cout << summary.FullReport() << std::endl;
 
     std::cout << fp->pos().transpose() << std::endl;
+
+    triangulate({std::make_tuple(Eigen::Vector4d(), Eigen::Vector3d(), Eigen::Vector2d())});
 
     return EXIT_SUCCESS;
 }
