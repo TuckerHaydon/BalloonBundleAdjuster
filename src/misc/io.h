@@ -1,6 +1,14 @@
 /* Author: Tucker Haydon */
 #pragma once 
 
+#include <Eigen/Core>
+#include <iostream>
+#include <fstream>
+#include <map>
+#include <string>
+
+#include "utility.h"
+
 typedef struct {
     Eigen::Vector3d ricI;
     Eigen::Vector3d rciC;
