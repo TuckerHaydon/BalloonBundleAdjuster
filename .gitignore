@@ -2,3 +2,4 @@
 *.m~
 .DS_Store
 build*
+images/
