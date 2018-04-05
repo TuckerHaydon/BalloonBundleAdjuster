@@ -24,6 +24,9 @@ typedef struct {
     Eigen::Matrix<double, 6, 6> P;
 } PoseInfo;
 
+const double imageWidth = 3840;
+const double imageHeight = 2176;
+
 std::map<std::string, Eigen::Vector2d> parseBalloonInfo(const std::string& filename) {
     
     std::map<std::string, Eigen::Vector2d> balloonInfoMap;
@@ -94,20 +97,25 @@ int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
 
     // Parse balloon info
-    std::map<std::string, Eigen::Vector2d> balloonInfoMap = parseBalloonInfo("../input/image_poses.txt");
+    std::map<std::string, Eigen::Vector2d> balloonInfoMap = parseBalloonInfo("../input/balloon_positions.txt");
 
     // Parse pose info
     std::map<std::string, PoseInfo> poseInfoMap = parsePoseInfo("../input/image_poses.txt");
     
     // Create the balloon feature point
-    auto fp = std::make_shared<FeaturePoint>(Eigen::Vector3d(-3, 0.2, 0.6));
+    auto fp = std::make_shared<FeaturePoint>(Eigen::Vector3d(-3, 0, 0));
 
     // Initialize cameras
+    std::vector< std::tuple<Eigen::Vector4d, Eigen::Vector3d, Eigen::Vector2d> > camInfoVec;
     std::vector< std::shared_ptr<Camera> > cams;
     for (auto const& it: balloonInfoMap) {
         const std::string imageName = it.first;
-        const Eigen::Vector2d feature = it.second;
-    
+        const Eigen::Vector2d featureGraphics = it.second;
+        const Eigen::Vector2d feature = Eigen::Vector2d(featureGraphics(0) - imageWidth/2, -1*(featureGraphics(1) - imageHeight/2));
+   
+        // If the pose isn't logged, continue 
+        if(poseInfoMap.find(imageName) == poseInfoMap.end()) { continue; }
+
         PoseInfo poseInfo = poseInfoMap.at(imageName);
 
         std::shared_ptr<Camera> cam = std::make_shared<Camera>(
@@ -117,7 +125,9 @@ int main(int argc, char** argv) {
             poseInfo.P
         );
         cams.push_back(cam);
+        camInfoVec.push_back(std::make_tuple(poseInfo.qIC, poseInfo.rciC, feature));
     }
+
 
     // Create a ceres problem
     ceres::Problem problem;
@@ -169,8 +179,7 @@ int main(int argc, char** argv) {
     std::cout << summary.FullReport() << std::endl;
 
     std::cout << fp->pos().transpose() << std::endl;
-
-    triangulate({std::make_tuple(Eigen::Vector4d(), Eigen::Vector3d(), Eigen::Vector2d())});
+    std::cout << triangulate(camInfoVec).transpose() << std::endl;
 
     return EXIT_SUCCESS;
 }
