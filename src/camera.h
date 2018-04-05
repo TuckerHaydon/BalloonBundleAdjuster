@@ -6,7 +6,7 @@
 #include <utility>
 #include <Eigen/Core>
 
-#include "types.h"
+#include "observation.h"
 
 class Camera {
 
@@ -24,6 +24,7 @@ public:
     Eigen::Matrix<double, 6, 6>& CovPrior();
 
     std::vector<Observation> Observations();
+    void AddObservation(const Observation observation);
 
 private:
     // Observations
@@ -41,7 +42,7 @@ private:
 
 };
 
-Camera::Camera(const Eigen::Vector3d t_vec_prior,
+inline Camera::Camera(const Eigen::Vector3d t_vec_prior,
                const Eigen::Vector4d q_vec_prior,
                const Eigen::Matrix<double, 6, 6> cov)
     : t_vec_prior_(t_vec_prior),
@@ -52,25 +53,29 @@ Camera::Camera(const Eigen::Vector3d t_vec_prior,
 {}
 
 inline Eigen::Vector3d& Camera::TVec() {
-    return this->t_vec_;
+    return t_vec_;
 }
 
 inline Eigen::Vector3d& Camera::TVecPrior() {
-    return this->t_vec_prior_;
+    return t_vec_prior_;
 }
 
 inline Eigen::Vector4d& Camera::QVec() {
-    return this->q_vec_;
+    return q_vec_;
 }
 
 inline Eigen::Vector4d& Camera::QVecPrior() {
-    return this->q_vec_prior_;
+    return q_vec_prior_;
 }
 
 inline Eigen::Matrix<double, 6, 6>& Camera::CovPrior() {
-    return this->cov_prior_;
+    return cov_prior_;
 }
 
 inline std::vector<Observation> Camera::Observations() {
-    return this->observations_;
+    return observations_;
+}
+
+inline void Camera::AddObservation(const Observation observation) {
+    observations_.push_back(observation);
 }

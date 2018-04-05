@@ -3,19 +3,20 @@
 #pragma once
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 
 
-Eigen::Vector4d Rot2Quat(const Eigen::Matrix3d& R) {
+inline Eigen::Vector4d Rot2Quat(const Eigen::Matrix3d& R) {
     const Eigen::Quaterniond q(R);
     return Eigen::Vector4d(q.w(), q.x(), q.y(), q.z());
 }
 
-Eigen::Matrix3d Quat2Rot(const Eigen::Vector4d& q) {
+inline Eigen::Matrix3d Quat2Rot(const Eigen::Vector4d& q) {
     const Eigen::Quaterniond q_(q(0), q(1), q(2), q(3));
     return Eigen::Matrix3d(q_);
 }
 
-Eigen::Vector4d Eul2Quat321(const double roll,
+inline Eigen::Vector4d Eul2Quat321(const double roll,
                             const double pitch,
                             const double yaw) {
     Eigen::Quaterniond q(
@@ -26,7 +27,7 @@ Eigen::Vector4d Eul2Quat321(const double roll,
     return Eigen::Vector4d(q.w(), q.x(), q.y(), q.z());
 }
 
-Eigen::Vector3d QuatRotatePoint(const Eigen::Vector4d& q,
+inline Eigen::Vector3d QuatRotatePoint(const Eigen::Vector4d& q,
                                 const Eigen::Vector3d& p) {
 
     return Quat2Rot(q) * p;
@@ -34,6 +35,6 @@ Eigen::Vector3d QuatRotatePoint(const Eigen::Vector4d& q,
 }
 
 // Requires q to be unit vector
-Eigen::Vector4d InvertQuat(const Eigen::Vector4d& q) {
+inline Eigen::Vector4d InvertQuat(const Eigen::Vector4d& q) {
     return Eigen::Vector4d(q.w(), -q.x(), -q.y(), -q.z());
 }

@@ -17,7 +17,7 @@ public:
 
 private:
     std::shared_ptr<Reconstruction> reconstruction_;
-}
+};
 
 inline BundleAdjuster::BundleAdjuster(std::shared_ptr<Reconstruction> reconstruction) {
     reconstruction_ = reconstruction;

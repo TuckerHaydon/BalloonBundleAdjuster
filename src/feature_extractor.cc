@@ -1,6 +1,5 @@
 /* Author: Tucker Haydon */
 
-#include <opencv2/core/core.hpp>
 #include <cstdlib>
 #include <string>
 #include <iostream>
@@ -13,7 +12,9 @@
 #include "callback.h"
 #include "feature_extractor.h"
 
-Camera FeatureExtractor::ExtractFeaturesFromImage(const std::string& image_path) {
+typedef std::shared_ptr<Camera> CameraPtr;
+
+CameraPtr FeatureExtractor::ExtractFeaturesFromImage(const std::string& image_path, const PoseInfo& pose_info) {
 
     // Load image
     const cv::Mat image = cv::imread(image_path, CV_LOAD_IMAGE_COLOR);
@@ -22,19 +23,16 @@ Camera FeatureExtractor::ExtractFeaturesFromImage(const std::string& image_path)
     const std::vector<BalloonInfo> balloon_info_vec = processImage(image);
 
     // Initialize camera
-    Camera camera = (pose_info.rciC, pose_info.qIC, pose_info.P);
+    CameraPtr camera = std::make_shared<Camera>(pose_info.rciC, pose_info.qIC, pose_info.P);
 
-    // Find the camera pose associated with the image
-    const PoseInfo pose_info = pose_map_.at(image_name);
-
-    for(const auto& balloon_info: balloon_info_vec)
+    for(const auto& balloon_info: balloon_info_vec) {
         const Eigen::Vector3d pos = balloon_info.balloonLocation;
         switch(balloon_info.color) {
             red: 
-                camera.AddObservation(red_feature, Eigen::Vector2d(pos(0), pos(1)));
+                camera->AddObservation(Observation(red_feature_, Eigen::Vector2d(pos(0), pos(1))));
                 break;
             blue:
-                camera.AddObservation(blue_feature, Eigen::Vector2d(pos(0), pos(1)));
+                camera->AddObservation(Observation(blue_feature_, Eigen::Vector2d(pos(0), pos(1))));
                 break;
             default: 
                 std::cerr << "Not red nor blue??" << std::endl;
@@ -73,10 +71,10 @@ Camera FeatureExtractor::ExtractFeaturesFromImage(const std::string& image_path)
 
 }
 
-std::vector<Camera> FeatureExtractor::ExtractFeaturesFromImageDirectory(const std::string& directory_path) {
+std::vector<CameraPtr> FeatureExtractor::ExtractFeaturesFromImageDirectory(const std::string& directory_path) {
     namespace fs = std::experimental::filesystem;
 
-    std::vector<Camera> cameras;
+    std::vector<CameraPtr> cameras;
 
     /* Process images */
     for(const auto& de: fs::directory_iterator(directory_path)){
@@ -88,11 +86,13 @@ std::vector<Camera> FeatureExtractor::ExtractFeaturesFromImageDirectory(const st
 
         // If the pose isn't logged, continue 
         if(pose_map_.find(image_name) == pose_map_.end()) { continue; }
+        
+        const PoseInfo pose_info = pose_map_.at(image_name);
 
         // Extract features from image and push onto vector
-        const Camera camera = ExtractFeaturesFromImage(image_path);
+        const CameraPtr camera = ExtractFeaturesFromImage(image_path, pose_info);
         cameras.push_back(camera);
     }
 
-    return cameras
+    return cameras;
 }

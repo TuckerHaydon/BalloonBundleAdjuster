@@ -10,7 +10,7 @@
 
 #include "utility.h"
 
-Eigen::Vector3d triangulate(const std::vector< std::tuple<Eigen::Vector4d, Eigen::Vector3d, Eigen::Vector2d> > camInfoVec) {
+inline Eigen::Vector3d triangulate(const std::vector< std::tuple<Eigen::Vector4d, Eigen::Vector3d, Eigen::Vector2d> > camInfoVec) {
     const double pixelSize = 1.12e-6;  // meters/pixel
     const double f = 1660 * pixelSize; // meters
     Eigen::Matrix<double, 3, 4> k = Eigen::Matrix<double, 3, 4>().setZero(); 

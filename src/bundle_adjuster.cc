@@ -3,6 +3,7 @@
 #include <ceres/ceres.h>
 
 #include "bundle_adjuster.h"
+#include "cost_functions.h"
 #include "camera.h"
 
 void BundleAdjuster::Solve() {
@@ -10,32 +11,33 @@ void BundleAdjuster::Solve() {
     ceres::Problem problem;
 
     // Add blocks to cost function
-    for (std::shared_ptr<Camera> cam: cams) {
+    for (std::shared_ptr<Camera> cam: reconstruction_->Cameras()) {
         // Camera Pose
         {
             ceres::CostFunction* cost_function = 
                 CameraPoseCostFunction::Create(
-                    cam->qVecPrior(), cam->tVecPrior(), cam->covPrior()
+                    cam->QVecPrior(), cam->TVecPrior(), cam->CovPrior()
                 );
     
             problem.AddResidualBlock(cost_function,
                                      NULL, /* squared loss */
-                                     cam->qVec().data(),
-                                     cam->tVec().data());
+                                     cam->QVec().data(),
+                                     cam->TVec().data());
         }
 
-        // Feature point
+        // Feature points
+        for(Observation observation: cam->Observations())
         {
             ceres::CostFunction* cost_function =
                 ReprojectionCostFunction::Create(
-                    cam->fp().first
+                    observation.Measurement()
                 );  
 
             problem.AddResidualBlock(cost_function,
                                      NULL,
-                                     cam->qVec().data(),
-                                     cam->tVec().data(),
-                                     cam->fp().second->pos().data()
+                                     cam->QVec().data(),
+                                     cam->TVec().data(),
+                                     observation.GetFeature()->Pos().data()
                                      );
         }
 
@@ -43,7 +45,7 @@ void BundleAdjuster::Solve() {
         ceres::LocalParameterization* quaternion_parameterization =
             new ceres::QuaternionParameterization;
                 problem.SetParameterization(
-                    cam->qVec().data(), 
+                    cam->QVec().data(), 
                     quaternion_parameterization);
     }
 
@@ -54,8 +56,6 @@ void BundleAdjuster::Solve() {
     ceres::Solver::Summary summary;
     ceres::Solve(options, &problem, &summary);
     std::cout << summary.FullReport() << std::endl;
-
-    std::cout << fp->pos().transpose() << std::endl;
 
     return;
 }

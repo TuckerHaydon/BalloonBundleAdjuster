@@ -17,7 +17,7 @@ typedef struct {
 } PoseInfo;
 
 
-std::map<std::string, Eigen::Vector2d> parseBalloonInfo(const std::string& filename) {
+inline std::map<std::string, Eigen::Vector2d> parseBalloonInfo(const std::string& filename) {
     
     std::map<std::string, Eigen::Vector2d> balloonInfoMap;
 
@@ -38,7 +38,7 @@ std::map<std::string, Eigen::Vector2d> parseBalloonInfo(const std::string& filen
     return balloonInfoMap;
 }
 
-std::map<std::string, PoseInfo> parsePoseInfo(const std::string& filename) {
+inline std::map<std::string, PoseInfo> parsePoseInfo(const std::string& filename) {
 
     std::map<std::string, PoseInfo> poseInfoMap;
 
