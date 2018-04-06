@@ -70,6 +70,6 @@ void Triangulator::Solve() {
         const Eigen::MatrixXd z   = -1 * H.rightCols(1);
         const Eigen::Vector3d x   = (H_r.transpose() * H_r).inverse() * H_r.transpose() * z;
 
-        feature->Prior(x);
+        feature->SetPrior(x);
     }
 }

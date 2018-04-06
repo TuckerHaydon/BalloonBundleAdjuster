@@ -8,26 +8,28 @@
 
 class Observation {
 public:
-    Observation(const std::shared_ptr<Feature> feature, const Eigen::Vector2d& feature_pos);
+    Observation(const std::shared_ptr<Feature> feature, const Eigen::Vector2d& measurement);
 
     Eigen::Vector2d Measurement();
-
     std::shared_ptr<Feature> GetFeature();
 
 private:
-    Eigen::Vector2d feature_pos_;
+    // 2D pixel observation
+    Eigen::Vector2d measurement_;
+
+    // Feature point corresponding to the observation
     std::shared_ptr<Feature> feature_;
 };
 
 inline Observation::Observation(
     const std::shared_ptr<Feature> feature,
-    const Eigen::Vector2d& feature_pos)
+    const Eigen::Vector2d& measurement)
     : feature_(feature),
-      feature_pos_(feature_pos)
+      measurement_(measurement)
 {}
 
 inline Eigen::Vector2d Observation::Measurement() {
-    return feature_pos_;
+    return measurement_;
 }
 
 inline std::shared_ptr<Feature> Observation::GetFeature() {

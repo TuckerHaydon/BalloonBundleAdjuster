@@ -44,7 +44,7 @@ void BundleAdjuster::Solve() {
                                      );
         }
 
-        // Quaternion parameterization of SO3 with 4 parameters
+        // Quaternion parameterization of R3 with 4 parameters
         ceres::LocalParameterization* quaternion_parameterization =
             new ceres::QuaternionParameterization;
                 problem.SetParameterization(

@@ -7,17 +7,25 @@
 class Feature {
 
 public:
+    // Constructor
     Feature();
-    Feature(const Eigen::Vector3d prior);
+
+    // Constructor with prior
+    Feature(const Eigen::Vector3d& prior);
+
+    // Expose a reference to the position
     Eigen::Vector3d& Pos();
-    void Prior(const Eigen::Vector3d& prior);
+
+    // Set the prior
+    void SetPrior(const Eigen::Vector3d& prior);
 
 private:
+    // Position of feature point in inertial frame
     Eigen::Vector3d pos_;
 };
 
 
-inline Feature::Feature(const Eigen::Vector3d prior) 
+inline Feature::Feature(const Eigen::Vector3d& prior) 
     : pos_(prior)
 {}
 
@@ -29,6 +37,6 @@ inline Eigen::Vector3d& Feature::Pos() {
     return pos_;
 }
 
-inline void Feature::Prior(const Eigen::Vector3d& prior) {
+inline void Feature::SetPrior(const Eigen::Vector3d& prior) {
     pos_ = prior;
 }

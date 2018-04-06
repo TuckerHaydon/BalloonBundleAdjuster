@@ -17,4 +17,22 @@ make -j4
 ./BalloonBundleAdjuster
 ```
 
+## Reference Frames
+### Camera frame
+* Origin - Center of image
+* Z - Along boresight
+* Y - Down
+* X - Right
+
+### Quad
+* Origin - Center of primary GPS antenna
+* Z - Up
+* Y - Left
+* X - Forward
+
+### Inertial (ENU)
+* Origin - On top of the chimney
+* Z - Up
+* Y - North
+* X - East
 

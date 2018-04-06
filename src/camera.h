@@ -15,31 +15,35 @@ public:
            const Eigen::Vector4d q_vec_prior,
            const Eigen::Matrix<double, 6, 6> cov);
 
+    // Position of inertial origin wrt camera origin in camera frame
     Eigen::Vector3d& TVec();
     Eigen::Vector3d& TVecPrior();
 
+    // Rotation of inertial frame away from camera frame
     Eigen::Vector4d& QVec();
     Eigen::Vector4d& QVecPrior();
 
+    // 6x6 covariance. First 3 terms are translation, last 3 are rotation
     Eigen::Matrix<double, 6, 6>& CovPrior();
 
+    // List of feature point observations
     std::vector<Observation> Observations();
     void AddObservation(const Observation observation);
 
 private:
-    // Observations
+    // Observations of feature points
     std::vector<Observation> observations_;
 
     // Position from camera origin to inertial origin in camera frame
     Eigen::Vector3d t_vec_;
+    Eigen::Vector3d t_vec_prior_;
 
     // Rotation of inertial frame away from camera frame
     Eigen::Vector4d q_vec_;
-
-    Eigen::Vector3d t_vec_prior_;
     Eigen::Vector4d q_vec_prior_;
-    Eigen::Matrix<double, 6, 6> cov_prior_;
 
+    // 6x6 covariance. First 3 terms are translation, last 3 are rotation
+    Eigen::Matrix<double, 6, 6> cov_prior_;
 };
 
 inline Camera::Camera(const Eigen::Vector3d t_vec_prior,
