@@ -170,7 +170,6 @@ const std::vector<BalloonInfo> processImage(const cv::Mat& img) {
 
         // Circle all the candidate contours
         std::for_each(candidateContours.begin(), candidateContours.end(), circleCandidateContours);
-        std::cout << candidateContours.size() << std::endl;
     }
 
     return infoVec;

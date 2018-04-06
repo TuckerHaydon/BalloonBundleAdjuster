@@ -11,12 +11,17 @@
 #include "sensor_params.h"
 #include "feature_extractor.h"
 #include "bundle_adjuster.h"
+#include "triangulate.h"
 
 /* Extern Variables */
-SensorParams sensorParams;
+SensorParams sensor_params;
 
 int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
+
+    // Load params
+    sensor_params.image_width = 3840.0;
+    sensor_params.image_height = 2176.0;
 
     // Parse info from text files
     const std::map<std::string, PoseInfo> pose_map = parsePoseInfo("../images/image_poses.txt");
@@ -35,7 +40,20 @@ int main(int argc, char** argv) {
     reconstruction.AddFeatures({red_feature, blue_feature});
 
     // Triangulate the feature points
-    // TODO
+    std::vector< std::tuple<Eigen::Vector4d, Eigen::Vector3d, Eigen::Vector2d> > cam_info_vec;
+    for(std::shared_ptr<Camera> cam: cameras) {
+        if(cam->Observations().size() > 0) {
+            cam_info_vec.push_back(
+                std::make_tuple(
+                    cam->QVec(),
+                    cam->TVec(),
+                    cam->Observations()[0].Measurement()
+                )
+            );
+        }
+    }
+    std::cout << triangulate(cam_info_vec).transpose() << std::endl;
+    return EXIT_SUCCESS;
 
     // Create a bundle adjuster
     BundleAdjuster bundle_adjuster(std::make_shared<Reconstruction>(reconstruction));

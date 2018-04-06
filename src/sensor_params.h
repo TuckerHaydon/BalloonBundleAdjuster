@@ -24,10 +24,10 @@ typedef struct {
     double k1;
 
     /* Image size */
-    uint16_t imageWidth;
-    uint16_t imageHeight;
+    uint16_t image_width;
+    uint16_t image_height;
 
 
 } SensorParams;
 
-extern SensorParams sensorParams;
+extern SensorParams sensor_params;

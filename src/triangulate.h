@@ -12,7 +12,8 @@
 
 inline Eigen::Vector3d triangulate(const std::vector< std::tuple<Eigen::Vector4d, Eigen::Vector3d, Eigen::Vector2d> > camInfoVec) {
     const double pixelSize = 1.12e-6;  // meters/pixel
-    const double f = 1660 * pixelSize; // meters
+    // const double f = 1660 * pixelSize; // meters
+    const double f = 3.47/1000.0; // meters
     Eigen::Matrix<double, 3, 4> k = Eigen::Matrix<double, 3, 4>().setZero(); 
     k.topLeftCorner<3,3>().diagonal() = Eigen::Vector3d(f, f, 1);
 
@@ -41,12 +42,12 @@ inline Eigen::Vector3d triangulate(const std::vector< std::tuple<Eigen::Vector4d
         i++;
     }
 
-    const Eigen::JacobiSVD<Eigen::MatrixXd> svd(H, Eigen::ComputeThinU | Eigen::ComputeThinV);
-    const Eigen::MatrixXd V = svd.matrixV();
-    const Eigen::Matrix4d X = V.rightCols(1);
-    return Eigen::Vector3d(X(0)/X(3), X(1)/X(3), X(2)/X(3));
+    // const Eigen::JacobiSVD<Eigen::MatrixXd> svd(H, Eigen::ComputeThinU | Eigen::ComputeThinV);
+    // const Eigen::MatrixXd V = svd.matrixV();
+    // const Eigen::Matrix4d X = V.rightCols(1);
+    // return Eigen::Vector3d(X(0)/X(3), X(1)/X(3), X(2)/X(3));
 
-    // const Eigen::MatrixXd H_r = H.leftCols(3);
-    // const Eigen::MatrixXd z = -1 * H.rightCols(1);
-    // return (H_r.transpose() * H_r).inverse() * H_r.transpose() * z;
+    const Eigen::MatrixXd H_r = H.leftCols(3);
+    const Eigen::MatrixXd z = -1 * H.rightCols(1);
+    return (H_r.transpose() * H_r).inverse() * H_r.transpose() * z;
 }

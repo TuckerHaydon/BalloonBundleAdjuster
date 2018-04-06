@@ -11,13 +11,14 @@
 
 #include "callback.h"
 #include "feature_extractor.h"
+#include "sensor_params.h"
 
 typedef std::shared_ptr<Camera> CameraPtr;
 
 CameraPtr FeatureExtractor::ExtractFeaturesFromImage(const std::string& image_path, const PoseInfo& pose_info) {
 
     // Load image
-    const cv::Mat image = cv::imread(image_path, CV_LOAD_IMAGE_COLOR);
+    cv::Mat image = cv::imread(image_path, CV_LOAD_IMAGE_COLOR);
 
     // Find balloons
     const std::vector<BalloonInfo> balloon_info_vec = processImage(image);
@@ -26,12 +27,15 @@ CameraPtr FeatureExtractor::ExtractFeaturesFromImage(const std::string& image_pa
     CameraPtr camera = std::make_shared<Camera>(pose_info.rciC, pose_info.qIC, pose_info.P);
 
     for(const auto& balloon_info: balloon_info_vec) {
-        const Eigen::Vector3d pos = balloon_info.balloonLocation;
+        const Eigen::Vector3d pos = 
+            balloon_info.balloonLocation - 
+            Eigen::Vector3d(sensor_params.image_width/2, sensor_params.image_height/2, 0);
+
         switch(balloon_info.color) {
-            red: 
+            case red: 
                 camera->AddObservation(Observation(red_feature_, Eigen::Vector2d(pos(0), pos(1))));
                 break;
-            blue:
+            case blue:
                 camera->AddObservation(Observation(blue_feature_, Eigen::Vector2d(pos(0), pos(1))));
                 break;
             default: 
@@ -39,36 +43,33 @@ CameraPtr FeatureExtractor::ExtractFeaturesFromImage(const std::string& image_pa
                 exit(EXIT_FAILURE);
             break;
         }
+
+        // std::cout << pos.transpose() << std::endl;
+
+        // // Draw outer circle
+        // cv::circle(image, 
+        //     cv::Point2d(balloon_info.balloonLocation(0), balloon_info.balloonLocation(1)),
+        //     balloon_info.balloonRadius,
+        //     cv::Scalar(0, 0, 0),
+        //     5);
+
+        // // Draw inner circle
+        // cv::circle(image, 
+        //     cv::Point2d(balloon_info.balloonLocation(0), balloon_info.balloonLocation(1)),
+        //     5,
+        //     cv::Scalar(0, 0, 0),
+        //     5);
+
+        // std::cout << balloon_info_vec.size() << std::endl;
+        // cv::Mat display_image = cv::Mat(960, 1280, 3);
+        // cv::resize(image, display_image, display_image.size());
+        // cv::imshow("Image", display_image); 
+        // cv::waitKey(0);  
     }
 
+
+
     return camera;
-
-    // // Draw circle around located balloons
-    // for(BalloonInfo& info: balloonInfoVec) {
-    //     // Draw outer circle
-    //     cv::circle(inputImg, 
-    //         cv::Point2d(info.balloonLocation(0), info.balloonLocation(1)),
-    //         info.balloonRadius,
-    //         cv::Scalar(0, 0, 0),
-    //         5);
-
-    //     // Draw inner circle
-    //     cv::circle(inputImg, 
-    //         cv::Point2d(info.balloonLocation(0), info.balloonLocation(1)),
-    //         5,
-    //         cv::Scalar(0, 0, 0),
-    //         5);
-    // }
-
-    // // Display image
-    // if(balloonInfoVec.size() > 1) {
-    //     std::cout << balloonInfoVec.size() << std::endl;
-    //     cv::Mat displayImg = cv::Mat(960, 1280, 3);
-    //     cv::resize(inputImg, displayImg, displayImg.size());
-    //     cv::imshow("Image", displayImg); 
-    //     cv::waitKey(0);  
-    // }
-
 }
 
 std::vector<CameraPtr> FeatureExtractor::ExtractFeaturesFromImageDirectory(const std::string& directory_path) {
