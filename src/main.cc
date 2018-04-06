@@ -11,7 +11,6 @@
 #include "sensor_params.h"
 #include "feature_extractor.h"
 #include "bundle_adjuster.h"
-#include "triangulate.h"
 #include "triangulator.h"
 
 /* Extern Variables */

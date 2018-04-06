@@ -3,9 +3,7 @@ project(BalloonBundleAdjuster)
 set(TARGET ${PROJECT_NAME})
 set(CMAKE_BUILD_TYPE Release)
 
-set(CMAKE_C_COMPILER "gcc-7")
-set(CMAKE_CXX_COMPILER "g++-7")
-set(CMAKE_CXX_FLAGS "-std=c++1z ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
 
 find_package(Ceres REQUIRED)
 find_package(Eigen3 REQUIRED)
