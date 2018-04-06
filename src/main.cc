@@ -12,6 +12,7 @@
 #include "feature_extractor.h"
 #include "bundle_adjuster.h"
 #include "triangulate.h"
+#include "triangulator.h"
 
 /* Extern Variables */
 SensorParams sensor_params;
@@ -30,8 +31,8 @@ int main(int argc, char** argv) {
     const std::map<std::string, PoseInfo> pose_map = parsePoseInfo("../images/image_poses.txt");
 
     // Create the balloon feature points
-    std::shared_ptr<Feature> red_feature  = std::make_shared<Feature>(Eigen::Vector3d(-3, 0, 0));
-    std::shared_ptr<Feature> blue_feature = std::make_shared<Feature>(Eigen::Vector3d(0, 0, 0));
+    std::shared_ptr<Feature> red_feature  = std::make_shared<Feature>();
+    std::shared_ptr<Feature> blue_feature = std::make_shared<Feature>();
 
     // Extract feature from images and generate cameras
     FeatureExtractor feature_extractor(pose_map, red_feature, blue_feature);
@@ -43,27 +44,15 @@ int main(int argc, char** argv) {
     reconstruction.AddFeatures({red_feature, blue_feature});
 
     // Triangulate the feature points
-    std::vector< std::tuple<Eigen::Vector4d, Eigen::Vector3d, Eigen::Vector2d> > cam_info_vec;
-    for(std::shared_ptr<Camera> cam: cameras) {
-        if(cam->Observations().size() > 0) {
-            cam_info_vec.push_back(
-                std::make_tuple(
-                    cam->QVec(),
-                    cam->TVec(),
-                    cam->Observations()[0].Measurement()
-                )
-            );
-        }
-    }
-    Eigen::Vector3d red_prior = triangulate(cam_info_vec);
-    std::cout << red_prior.transpose() << std::endl;
-    red_feature->Prior(red_prior);
+    Triangulator triangulator({red_feature, blue_feature}, cameras);
+    triangulator.Solve();
 
     // Create a bundle adjuster
     BundleAdjuster bundle_adjuster(std::make_shared<Reconstruction>(reconstruction));
     bundle_adjuster.Solve();
 
     std::cout << red_feature->Pos().transpose() << std::endl;
+
 
     return EXIT_SUCCESS;
 }
