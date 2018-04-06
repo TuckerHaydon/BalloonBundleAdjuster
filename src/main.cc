@@ -45,11 +45,11 @@ int main(int argc, char** argv) {
     // Triangulate the feature points
     Triangulator triangulator({red_feature, blue_feature}, cameras);
     triangulator.Solve();
+    std::cout << red_feature->Pos().transpose() << std::endl;
 
     // Create a bundle adjuster
     BundleAdjuster bundle_adjuster(std::make_shared<Reconstruction>(reconstruction));
     bundle_adjuster.Solve();
-
     std::cout << red_feature->Pos().transpose() << std::endl;
 
 
