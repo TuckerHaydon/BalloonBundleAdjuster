@@ -6,6 +6,8 @@
 #include <ceres/ceres.h>
 #include <ceres/rotation.h>
 
+#include "sensor_params.h"
+
 class CameraPoseCostFunction {
 
 public:
@@ -126,19 +128,21 @@ public:
         projection[1] /= projection[2];
         projection[2] /= projection[2];
 
+        projection[0] *= T(sensor_params.f);
+        projection[1] *= T(sensor_params.f);
+        projection[2] *= T(sensor_params.f);
+
         // Transform from meters to pixels
-        const double pixelSize = 1.12e-6; // meters per pixel
-        projection[0] /= pixelSize;
-        projection[1] /= pixelSize;
+        projection[0] /= sensor_params.pixel_size;
+        projection[1] /= sensor_params.pixel_size;
 
         // Re-projection error.
         residuals[0] = projection[0] - T(feature2D_(0));
         residuals[1] = projection[1] - T(feature2D_(1));
 
         // Covariance of pixels. Assumed to be independent. Divide by standard deviation.
-        const T sig = T(20.0);
-        residuals[0] /= sig;
-        residuals[1] /= sig;
+        residuals[0] /= T(sensor_params.stdev_feature);
+        residuals[1] /= T(sensor_params.stdev_feature);
 
         return true;
     }

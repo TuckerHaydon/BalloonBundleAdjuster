@@ -18,7 +18,7 @@ typedef struct {
     double f;
 
     /* Size of a pixel in meters */
-    double pixelSize;
+    double pixel_size;
 
     /* Camera intrinsics */
     double k1;
@@ -26,6 +26,9 @@ typedef struct {
     /* Image size */
     uint16_t image_width;
     uint16_t image_height;
+
+    /* Feature uncertainty in pixels */
+    double stdev_feature;
 
 
 } SensorParams;

@@ -10,6 +10,7 @@ public:
     Feature();
     Feature(const Eigen::Vector3d prior);
     Eigen::Vector3d& Pos();
+    void Prior(const Eigen::Vector3d& prior);
 
 private:
     Eigen::Vector3d pos_;
@@ -28,3 +29,6 @@ inline Eigen::Vector3d& Feature::Pos() {
     return pos_;
 }
 
+inline void Feature::Prior(const Eigen::Vector3d& prior) {
+    pos_ = prior;
+}

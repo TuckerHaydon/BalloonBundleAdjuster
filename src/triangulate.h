@@ -11,11 +11,8 @@
 #include "utility.h"
 
 inline Eigen::Vector3d triangulate(const std::vector< std::tuple<Eigen::Vector4d, Eigen::Vector3d, Eigen::Vector2d> > camInfoVec) {
-    const double pixelSize = 1.12e-6;  // meters/pixel
-    // const double f = 1660 * pixelSize; // meters
-    const double f = 3.47/1000.0; // meters
     Eigen::Matrix<double, 3, 4> k = Eigen::Matrix<double, 3, 4>().setZero(); 
-    k.topLeftCorner<3,3>().diagonal() = Eigen::Vector3d(f, f, 1);
+    k.topLeftCorner<3,3>().diagonal() = Eigen::Vector3d(sensor_params.f, sensor_params.f, 1);
 
     const size_t nz = camInfoVec.size();
     Eigen::MatrixXd H(2*nz, 4);
@@ -33,8 +30,8 @@ inline Eigen::Vector3d triangulate(const std::vector< std::tuple<Eigen::Vector4d
         const Eigen::Vector4d P2 = P.row(1);
         const Eigen::Vector4d P3 = P.row(2);
 
-        const double x_tilde = feat(0) * pixelSize;
-        const double y_tilde = feat(1) * pixelSize;
+        const double x_tilde = feat(0) * sensor_params.pixel_size;
+        const double y_tilde = feat(1) * sensor_params.pixel_size;
 
         H.row(2*i)   = x_tilde * P3 - P1;
         H.row(2*i+1) = y_tilde * P3 - P2;

@@ -20,14 +20,17 @@ int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
 
     // Load params
-    sensor_params.image_width = 3840.0;
-    sensor_params.image_height = 2176.0;
+    sensor_params.image_width   = 3840.0;
+    sensor_params.image_height  = 2176.0;
+    sensor_params.pixel_size    = 1.12e-6;
+    sensor_params.f             = 3.47/1000.0;
+    sensor_params.stdev_feature = 50.0;
 
     // Parse info from text files
     const std::map<std::string, PoseInfo> pose_map = parsePoseInfo("../images/image_poses.txt");
 
     // Create the balloon feature points
-    std::shared_ptr<Feature> red_feature  = std::make_shared<Feature>(Eigen::Vector3d(0, 0, 0));
+    std::shared_ptr<Feature> red_feature  = std::make_shared<Feature>(Eigen::Vector3d(-3, 0, 0));
     std::shared_ptr<Feature> blue_feature = std::make_shared<Feature>(Eigen::Vector3d(0, 0, 0));
 
     // Extract feature from images and generate cameras
@@ -52,8 +55,9 @@ int main(int argc, char** argv) {
             );
         }
     }
-    std::cout << triangulate(cam_info_vec).transpose() << std::endl;
-    return EXIT_SUCCESS;
+    Eigen::Vector3d red_prior = triangulate(cam_info_vec);
+    std::cout << red_prior.transpose() << std::endl;
+    red_feature->Prior(red_prior);
 
     // Create a bundle adjuster
     BundleAdjuster bundle_adjuster(std::make_shared<Reconstruction>(reconstruction));

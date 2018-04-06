@@ -5,6 +5,8 @@
 #include "bundle_adjuster.h"
 #include "cost_functions.h"
 #include "camera.h"
+#include "utility.h"
+#include "sensor_params.h"
 
 void BundleAdjuster::Solve() {
     // Create a ceres problem
@@ -14,6 +16,7 @@ void BundleAdjuster::Solve() {
     for (std::shared_ptr<Camera> cam: reconstruction_->Cameras()) {
         // Camera Pose
         {
+
             ceres::CostFunction* cost_function = 
                 CameraPoseCostFunction::Create(
                     cam->QVecPrior(), cam->TVecPrior(), cam->CovPrior()
