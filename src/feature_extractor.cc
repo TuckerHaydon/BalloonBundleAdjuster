@@ -43,31 +43,7 @@ CameraPtr FeatureExtractor::ExtractFeaturesFromImage(const std::string& image_pa
                 exit(EXIT_FAILURE);
             break;
         }
-
-        // std::cout << pos.transpose() << std::endl;
-
-        // // Draw outer circle
-        // cv::circle(image, 
-        //     cv::Point2d(balloon_info.balloonLocation(0), balloon_info.balloonLocation(1)),
-        //     balloon_info.balloonRadius,
-        //     cv::Scalar(0, 0, 0),
-        //     5);
-
-        // // Draw inner circle
-        // cv::circle(image, 
-        //     cv::Point2d(balloon_info.balloonLocation(0), balloon_info.balloonLocation(1)),
-        //     5,
-        //     cv::Scalar(0, 0, 0),
-        //     5);
-
-        // std::cout << balloon_info_vec.size() << std::endl;
-        // cv::Mat display_image = cv::Mat(960, 1280, 3);
-        // cv::resize(image, display_image, display_image.size());
-        // cv::imshow("Image", display_image); 
-        // cv::waitKey(0);  
     }
-
-
 
     return camera;
 }

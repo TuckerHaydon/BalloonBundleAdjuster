@@ -36,3 +36,13 @@ make -j4
 * Y - North
 * X - East
 
+## Notation
+### Rotation Matrix vs Direction Cosine Matrix
+To dispell ambiguity, I make a distinction between Rotation Matrices and Direction Cosine Matrices.
+
+Rotation matrices describe how frame B is rotated away from frame A as
+viewed from frame A. The columns of the rotation matrix R can be
+interpreted as the unit vectors of B as viewed in frame A. A rotation of
+frame B away from frame A is denoted by 'RBA'.
+
+Direction cosine matrices are operators that take a vector expressed in frame A and express it in frame B. Direction cosine matrices are denoted by 'DCM_AB'.

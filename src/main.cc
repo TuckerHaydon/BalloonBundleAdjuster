@@ -20,11 +20,17 @@ int main(int argc, char** argv) {
     google::InitGoogleLogging(argv[0]);
 
     // Load params
-    sensor_params.image_width   = 3840.0;
-    sensor_params.image_height  = 2176.0;
+    sensor_params.image_width   = 3840;
+    sensor_params.image_height  = 2160;
     sensor_params.pixel_size    = 1.12e-6;
-    sensor_params.f             = 3.47/1000.0;
+    sensor_params.fx            = 1691.0;
+    sensor_params.fy            = 1697.0;
     sensor_params.stdev_feature = 50.0;
+    sensor_params.RCB           = Eul2Rot321(-120.0 * M_PI/180.0, 0, -M_PI/2);
+    sensor_params.rcB           = Eigen::Vector3d(0.017, 0, -0.09);
+    sensor_params.riG           = Eigen::Vector3d(-742015.2849821189, -5462219.4951718654, 3198014.4005017849);
+    sensor_params.sig_roll      = 5 * M_PI/180;
+    sensor_params.intrinsics    = {1914, 1074, -0.06117476, 0.11208021, -0.00043455, -0.00232441, -0.06783447};
 
     // Parse info from text files
     const std::map<std::string, PoseInfo> pose_map = parsePoseInfo("../images/image_poses.txt");
@@ -45,12 +51,19 @@ int main(int argc, char** argv) {
     // Triangulate the feature points
     Triangulator triangulator({red_feature, blue_feature}, cameras);
     triangulator.Solve();
+    triangulator.SolveRobust();
+
+    std::cout << "Triangulation" << std::endl;
     std::cout << red_feature->Pos().transpose() << std::endl;
+    std::cout << blue_feature->Pos().transpose() << std::endl;
 
     // Create a bundle adjuster
     BundleAdjuster bundle_adjuster(std::make_shared<Reconstruction>(reconstruction));
     bundle_adjuster.Solve();
+
+    std::cout << "Bundle Adjustement" << std::endl;
     std::cout << red_feature->Pos().transpose() << std::endl;
+    std::cout << blue_feature->Pos().transpose() << std::endl;
 
 
     return EXIT_SUCCESS;

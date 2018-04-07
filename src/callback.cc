@@ -40,12 +40,15 @@ const std::vector<BalloonInfo> processImage(const cv::Mat& img) {
 
     const std::vector<Filter> filters = {redFilter, blueFilter};
 
-    // Image properties
-    const uint16_t rows = img.rows;
-    const uint16_t cols = img.cols;
 
-    // Clone the image
-    cv::Mat frame = img.clone();
+    // Crop the image
+	cv::Mat cp = img.clone();
+	cv::Rect ROI(0, 0, sensor_params.image_width-1, sensor_params.image_height-1);
+	cv::Mat frame = cp(ROI);
+
+    // Image properties
+    const uint16_t rows = frame.rows;
+    const uint16_t cols = frame.cols;
 
     // Return vector
     std::vector<BalloonInfo> infoVec;

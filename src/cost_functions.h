@@ -7,6 +7,7 @@
 #include <ceres/rotation.h>
 
 #include "sensor_params.h"
+#include "camera_models.h"
 
 class CameraPoseCostFunction {
 
@@ -126,19 +127,16 @@ public:
         // Project to image plane.
         projection[0] /= projection[2];
         projection[1] /= projection[2];
-        projection[2] /= projection[2];
 
-        projection[0] *= T(sensor_params.f);
-        projection[1] *= T(sensor_params.f);
-        projection[2] *= T(sensor_params.f);
-
-        // Transform from meters to pixels
-        projection[0] /= sensor_params.pixel_size;
-        projection[1] /= sensor_params.pixel_size;
+        // Convert from meters to pixels and apply distortion model
+        T image[2];
+        OpenCVCameraModel<T>().WorldToImage(projection[0], projection[1], &image[0], &image[1]);
+        // projection[0] *= T(sensor_params.fx);
+        // projection[1] *= T(sensor_params.fy);
 
         // Re-projection error.
-        residuals[0] = projection[0] - T(feature2D_(0));
-        residuals[1] = projection[1] - T(feature2D_(1));
+        residuals[0] = image[0] - T(feature2D_(0));
+        residuals[1] = image[1] - T(feature2D_(1));
 
         // Covariance of pixels. Assumed to be independent. Divide by standard deviation.
         residuals[0] /= T(sensor_params.stdev_feature);

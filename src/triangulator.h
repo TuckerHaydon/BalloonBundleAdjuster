@@ -16,6 +16,10 @@ public:
     // Traingulates the position of feature points and sets the feature points' priors
     void Solve();
 
+    // Triangulates the position of feature points and sets the feature points' priors
+    // Uses a pseduo-RANSAC
+    void SolveRobust();
+
 private:
     // List of feature points to triangulate
     std::vector< std::shared_ptr<Feature> > features_;

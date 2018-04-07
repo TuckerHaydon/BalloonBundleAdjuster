@@ -27,6 +27,17 @@ inline Eigen::Vector4d Eul2Quat321(const double& roll,
     return Eigen::Vector4d(q.w(), q.x(), q.y(), q.z());
 }
 
+inline Eigen::Matrix3d Eul2Rot321(const double& roll,
+                                  const double& pitch,
+                                  const double& yaw) {
+    Eigen::Quaterniond q(
+        Eigen::AngleAxisd(yaw,   Eigen::Vector3d::UnitZ()) *
+        Eigen::AngleAxisd(pitch, Eigen::Vector3d::UnitY()) *
+        Eigen::AngleAxisd(roll,  Eigen::Vector3d::UnitX()));
+
+    return Eigen::Matrix3d(q);
+}
+
 inline Eigen::Vector3d QuatRotatePoint(const Eigen::Vector4d& q,
                                        const Eigen::Vector3d& p) {
     return Quat2Rot(q) * p;
