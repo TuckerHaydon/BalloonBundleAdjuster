@@ -5,6 +5,7 @@
 #include <Eigen/Core>
 
 #include "sensor_params.h"
+#include "transform.h"
 
 typedef struct {
     double az;              // Azimuth

@@ -14,6 +14,7 @@
 #include "triangulator.h"
 #include "transform.h"
 #include "measurement_converter.h"
+#include "sigma_point_transform.h"
 
 /* Extern Variables */
 SensorParams sensor_params;
@@ -37,6 +38,24 @@ int main(int argc, char** argv) {
     // Parse info from text files
     std::map<std::string, PoseInfo> pose_map = ParsePoseInfo("../images/image_poses.txt");
     std::map<std::string, MeasurementInfo> measurement_map = ParseMeasurementFile("../images/image_data_raw.txt");
+
+    for(const auto& it: measurement_map) {
+        const std::string image_name = it.first;
+        const MeasurementInfo meas_info = it.second;
+
+        if(pose_map.find(image_name) == pose_map.end()) { continue; }
+
+        std::cout << image_name << std::endl;
+        const TransformedMeasurement meas = SigmaPointTransform().TransformMeasurement(meas_info);
+
+        std::cout << pose_map[image_name].P << std::endl;
+        std::cout << std::endl;
+        std::cout << meas.P << std::endl;
+        std::cout << "============================" << std::endl;
+        // break;
+    }
+
+    return EXIT_SUCCESS;
 
     // Create the balloon feature points
     std::shared_ptr<Feature> red_feature  = std::make_shared<Feature>();

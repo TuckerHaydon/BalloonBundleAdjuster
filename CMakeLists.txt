@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.5.0)
 project(BalloonBundleAdjuster)
 set(TARGET ${PROJECT_NAME})
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
+
+set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS} -Wno-format-security -Wno-literal-suffix")
 
 find_package(Ceres REQUIRED)
 find_package(Eigen3 REQUIRED)
