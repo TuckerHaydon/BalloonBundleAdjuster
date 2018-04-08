@@ -15,51 +15,51 @@ inline Eigen::Vector3d AzElRoll2RollPitchYaw(
 }
 
 inline Eigen::Vector3d Body2ENU(
-    const Eigen::Vector3d& vB,      // Vector in body frame
+    const Eigen::Vector3d& rB,      // Vector in body frame
     const Eigen::Matrix3d& RBI,     // Rotation of body away from ENU
-    const Eigen::Vector3d& vibI     // Vector from ENU origin to body origin in ENU frame
+    const Eigen::Vector3d& ribI     // Vector from ENU origin to body origin in ENU frame
     ) {
-        return vibI + RBI * vB;
+        return ribI + RBI * rB;
 }
 
 inline Eigen::Vector3d ENU2Body(
-    const Eigen::Vector3d& vI,      // Vector in ENU frame
+    const Eigen::Vector3d& rI,      // Vector in ENU frame
     const Eigen::Matrix3d& RIB,     // Rotation of ENU away from body
     const Eigen::Vector3d& rbiB     // Vector from body origin to ENU origin in body frame
     ) {
-        return rbiB + RIB * vI;
+        return rbiB + RIB * rI;
 }
 
 inline Eigen::Vector3d ENU2ECEF(
-    const Eigen::Vector3d& vI,      // Vector in ENU frame
+    const Eigen::Vector3d& rI,      // Vector in ENU frame
     const Eigen::Matrix3d& RIG,     // Rotation of ENU away from ECEF
-    const Eigen::Vector3d& vgiG     // Vector from ECEF origin to ENU origin in ECEF frame
+    const Eigen::Vector3d& rgiG     // Vector from ECEF origin to ENU origin in ECEF frame
     ) {
-        return vgiG + RIG * vI;
+        return rgiG + RIG * rI;
 }
 
 inline Eigen::Vector3d ECEF2ENU(
-    const Eigen::Vector3d& vG,      // Vector in ECEF frame
+    const Eigen::Vector3d& rG,      // Vector in ECEF frame
     const Eigen::Matrix3d& RGI,     // Rotation of ECEF away from ENU
-    const Eigen::Vector3d& vigI     // Vector from ENU origin to ECEF origin in ENU frame
+    const Eigen::Vector3d& rigI     // Vector from ENU origin to ECEF origin in ENU frame
     ) {
-        return vigI + RGI * vG;
+        return rigI + RGI * rG;
 }
 
 inline Eigen::Vector3d Camera2Body(
-    const Eigen::Vector3d& vC,      // Vector in camera frame
+    const Eigen::Vector3d& rC,      // Vector in camera frame
     const Eigen::Matrix3d& RCB,     // Rotation of camera frame away from body frame
     const Eigen::Vector3d& rbcB     // Vector from body origin to camera origin in body frame
     ) {
-        return rbcB + RCB * vC;
+        return rbcB + RCB * rC;
 }
 
 inline Eigen::Vector3d Body2Camera(
-    const Eigen::Vector3d& vB,      // Vector in body frame
+    const Eigen::Vector3d& rB,      // Vector in body frame
     const Eigen::Matrix3d& RBC,     // Rotation of body away from camera
     const Eigen::Vector3d& rcbC     // Vector from camera origin to body origin in camera frame
     ) {
-        return rcbC + RBC * vB;
+        return rcbC + RBC * rB;
 }
 
 inline Eigen::Vector3d Sphere2Cart(

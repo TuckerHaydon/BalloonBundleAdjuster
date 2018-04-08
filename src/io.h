@@ -16,7 +16,17 @@ typedef struct {
     Eigen::Matrix<double, 6, 6> P;
 } PoseInfo;
 
-inline std::map<std::string, PoseInfo> parsePoseInfo(const std::string& filename) {
+typedef struct {
+    double az;                  // Azimuth in radians
+    double el;                  // Elevation in radians
+    double az_sigma;            // Standard deviation of azimuth
+    double el_sigma;            // Standard deviation of elevation
+    Eigen::Vector3d rpG;        // Primary antenna in ECEF
+    Eigen::Matrix3d RpG;        // Covariance of primary antenna
+    Eigen::Matrix3d RbG;        // Covariance of baseline
+} MeasurementInfo;
+
+inline std::map<std::string, PoseInfo> ParsePoseInfo(const std::string& filename) {
 
     std::map<std::string, PoseInfo> poseInfoMap;
 
@@ -61,3 +71,51 @@ inline std::map<std::string, PoseInfo> parsePoseInfo(const std::string& filename
     return poseInfoMap;
 }
 
+inline std::map<std::string, MeasurementInfo> ParseMeasurementFile(const std::string& filename) {
+
+    std::map<std::string, MeasurementInfo> measurement_map;
+
+    std::ifstream f(filename);
+    std::string line;
+    while (getline(f, line)) {
+        if(line.at(0) == '#') { continue; }
+
+        std::stringstream ss(line);
+        std::string imageName;
+        double az;
+        double el;
+        double az_sigma;
+        double el_sigma;
+        Eigen::Vector3d rpG;
+        Eigen::Matrix3d RpG;
+        Eigen::Matrix3d RbG;
+        
+        ss >> imageName;
+        ss >> rpG(0) >> rpG(1) >> rpG(2);
+    
+        // Covariance of primary
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < i+1; j++) {
+                ss >> RpG(j, i);
+                RpG(i, j) = RpG(j, i);
+            }
+        }
+
+        // Attitude
+        ss >> el >> az >> el_sigma >> az_sigma;
+
+        // Covariance of baseline
+        for(int i = 0; i < 3; i++) {
+            for(int j = 0; j < i+1; j++) {
+                ss >> RbG(j, i);
+                RbG(i, j) = RbG(j, i);
+            }
+        }
+
+
+        measurement_map[imageName] = MeasurementInfo{az, el, az_sigma, el_sigma, rpG, RpG, RbG};
+    }
+
+    return measurement_map;
+
+}

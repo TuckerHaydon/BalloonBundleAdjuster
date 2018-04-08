@@ -12,6 +12,8 @@
 #include "feature_extractor.h"
 #include "bundle_adjuster.h"
 #include "triangulator.h"
+#include "transform.h"
+#include "measurement_converter.h"
 
 /* Extern Variables */
 SensorParams sensor_params;
@@ -33,7 +35,8 @@ int main(int argc, char** argv) {
     sensor_params.intrinsics    = {1914, 1074, -0.06117476, 0.11208021, -0.00043455, -0.00232441, -0.06783447};
 
     // Parse info from text files
-    const std::map<std::string, PoseInfo> pose_map = parsePoseInfo("../images/image_poses.txt");
+    std::map<std::string, PoseInfo> pose_map = ParsePoseInfo("../images/image_poses.txt");
+    std::map<std::string, MeasurementInfo> measurement_map = ParseMeasurementFile("../images/image_data_raw.txt");
 
     // Create the balloon feature points
     std::shared_ptr<Feature> red_feature  = std::make_shared<Feature>();
