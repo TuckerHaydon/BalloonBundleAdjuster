@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
     sensor_params.stdev_feature = 50.0;
     sensor_params.RCB           = Eul2Rot321(-120.0 * M_PI/180.0, 0, -M_PI/2);
     sensor_params.rcB           = Eigen::Vector3d(0.017, 0, -0.09);
-    sensor_params.riG           = Eigen::Vector3d(-742015.2849821189, -5462219.4951718654, 3198014.4005017849);
+    sensor_params.riG           = Eigen::Vector3d(-742018.3187986395, -5462218.0363918105, 3198014.2988005267);
     sensor_params.sig_roll      = 5 * M_PI/180;
     sensor_params.intrinsics    = {1914, 1074, -0.06117476, 0.11208021, -0.00043455, -0.00232441, -0.06783447};
 
