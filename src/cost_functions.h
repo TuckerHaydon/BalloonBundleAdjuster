@@ -131,8 +131,6 @@ public:
         // Convert from meters to pixels and apply distortion model
         T image[2];
         OpenCVCameraModel<T>().WorldToImage(projection[0], projection[1], &image[0], &image[1]);
-        // projection[0] *= T(sensor_params.fx);
-        // projection[1] *= T(sensor_params.fy);
 
         // Re-projection error.
         residuals[0] = image[0] - T(feature2D_(0));
