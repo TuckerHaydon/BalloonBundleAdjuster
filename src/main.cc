@@ -14,6 +14,7 @@
 #include "triangulator.h"
 #include "transform.h"
 #include "measurement_converter.h"
+#include "sigma_point_transform.h"
 
 /* Extern Variables */
 SensorParams sensor_params;
@@ -35,14 +36,24 @@ int main(int argc, char** argv) {
     sensor_params.intrinsics    = {1914, 1074, -0.06117476, 0.11208021, -0.00043455, -0.00232441, -0.06783447};
 
     // Parse info from text files
-    std::map<std::string, PoseInfo> pose_map = ParsePoseInfo("../images/image_poses.txt");
     std::map<std::string, MeasurementInfo> measurement_map = ParseMeasurementFile("../images/image_data_raw.txt");
+    std::map<std::string, PoseInfo> pose_map;
+
+    // Convert measurement to map
+    for(const auto& it: measurement_map) {
+        const std::string image_name = it.first;
+        const MeasurementInfo meas_info = it.second;
+
+        const TransformedMeasurement meas = SigmaPointTransform().TransformMeasurement(meas_info);
+        pose_map[image_name] = PoseInfo{Eigen::Vector3d(0, 0, 0), meas.rciC, Rot2Quat(meas.RIC), meas.P};
+    }
 
     // Create the balloon feature points
     std::shared_ptr<Feature> red_feature  = std::make_shared<Feature>();
     std::shared_ptr<Feature> blue_feature = std::make_shared<Feature>();
 
     // Extract feature from images and generate cameras
+    std::cout << "Detecting balloons..." << std::endl;
     FeatureExtractor feature_extractor(pose_map, red_feature, blue_feature);
     std::vector< std::shared_ptr<Camera> > cameras =  feature_extractor.ExtractFeaturesFromImageDirectory("../images");
     
@@ -54,9 +65,8 @@ int main(int argc, char** argv) {
     // Triangulate the feature points
     Triangulator triangulator({red_feature, blue_feature}, cameras);
     triangulator.Solve();
-    triangulator.SolveRobust();
 
-    std::cout << "Triangulation" << std::endl;
+    std::cout << "Triangulating features..." << std::endl;
     std::cout << red_feature->Pos().transpose() << std::endl;
     std::cout << blue_feature->Pos().transpose() << std::endl;
 
@@ -64,10 +74,9 @@ int main(int argc, char** argv) {
     BundleAdjuster bundle_adjuster(std::make_shared<Reconstruction>(reconstruction));
     bundle_adjuster.Solve();
 
-    std::cout << "Bundle Adjustement" << std::endl;
+    std::cout << "Bundle Adjustment..." << std::endl;
     std::cout << red_feature->Pos().transpose() << std::endl;
     std::cout << blue_feature->Pos().transpose() << std::endl;
-
 
     return EXIT_SUCCESS;
 }

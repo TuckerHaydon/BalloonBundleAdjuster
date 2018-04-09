@@ -19,8 +19,10 @@ typedef struct {
 typedef struct {
     double az;                  // Azimuth in radians
     double el;                  // Elevation in radians
+    double roll;                // Roll angle in radians
     double az_sigma;            // Standard deviation of azimuth
     double el_sigma;            // Standard deviation of elevation
+    double roll_sigma;          // Standard deviation of roll
     Eigen::Vector3d rpG;        // Primary antenna in ECEF
     Eigen::Matrix3d RpG;        // Covariance of primary antenna
     Eigen::Matrix3d RbG;        // Covariance of baseline
@@ -84,8 +86,10 @@ inline std::map<std::string, MeasurementInfo> ParseMeasurementFile(const std::st
         std::string imageName;
         double az;
         double el;
+        double roll;
         double az_sigma;
         double el_sigma;
+        double roll_sigma;
         Eigen::Vector3d rpG;
         Eigen::Matrix3d RpG;
         Eigen::Matrix3d RbG;
@@ -95,7 +99,8 @@ inline std::map<std::string, MeasurementInfo> ParseMeasurementFile(const std::st
     
         // Covariance of primary
         for(int i = 0; i < 3; i++) {
-            for(int j = 0; j < i+1; j++) {
+            for(int j = 0; j < 3; j++) {
+                if(i > j) { continue; }
                 ss >> RpG(j, i);
                 RpG(i, j) = RpG(j, i);
             }
@@ -103,17 +108,20 @@ inline std::map<std::string, MeasurementInfo> ParseMeasurementFile(const std::st
 
         // Attitude
         ss >> el >> az >> el_sigma >> az_sigma;
+        roll = 0;
+        roll_sigma = 5 * M_PI/180;
 
         // Covariance of baseline
         for(int i = 0; i < 3; i++) {
-            for(int j = 0; j < i+1; j++) {
+            for(int j = 0; j < 3; j++) {
+                if(i > j) { continue; }
                 ss >> RbG(j, i);
                 RbG(i, j) = RbG(j, i);
             }
         }
 
 
-        measurement_map[imageName] = MeasurementInfo{az, el, az_sigma, el_sigma, rpG, RpG, RbG};
+        measurement_map[imageName] = MeasurementInfo{az, el, roll, az_sigma, el_sigma, roll_sigma, rpG, RpG, RbG};
     }
 
     return measurement_map;

@@ -61,8 +61,8 @@ void Triangulator::Solve() {
             const Eigen::Vector4d P2 = P.row(1);
             const Eigen::Vector4d P3 = P.row(2);
 
-            const double x_tilde = pix(0) * sensor_params.pixel_size;
-            const double y_tilde = pix(1) * sensor_params.pixel_size;
+            const double x_tilde = pix(0);
+            const double y_tilde = pix(1);
 
             H.row(2*i)   = x_tilde * P3 - P1;
             H.row(2*i+1) = y_tilde * P3 - P2;
@@ -147,12 +147,7 @@ void Triangulator::SolveRobust() {
             const Eigen::MatrixXd H_r = H.leftCols(3);
             const Eigen::MatrixXd z   = -1 * H.rightCols(1);
             const Eigen::Vector3d x   = (H_r.transpose() * H_r).inverse() * H_r.transpose() * z;
-            std::cout << x.transpose() << std::endl;
-
-
         }
-        std::cout << std::endl;
-
 
         // feature->SetPrior(x);
     }
