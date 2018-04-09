@@ -23,7 +23,7 @@ void BundleAdjuster::Solve() {
                 );
     
             problem.AddResidualBlock(cost_function,
-                                     new ceres::ArctanLoss(5),
+                                     new ceres::ArctanLoss(1),
                                      cam->QVec().data(),
                                      cam->TVec().data());
         }
@@ -37,7 +37,7 @@ void BundleAdjuster::Solve() {
                 );  
 
             problem.AddResidualBlock(cost_function,
-                                     new ceres::ArctanLoss(5),
+                                     new ceres::ArctanLoss(1),
                                      cam->QVec().data(),
                                      cam->TVec().data(),
                                      observation.GetFeature()->Pos().data()
