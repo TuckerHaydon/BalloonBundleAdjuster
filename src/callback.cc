@@ -162,13 +162,6 @@ const std::vector<BalloonInfo> processImage(const cv::Mat& img) {
             info.balloonLocation = Eigen::Vector3d(centerHull.x, centerHull.y, 0);
             info.color = color;
             infoVec.push_back(info);
-
-            if(color == red) {
-                std::cout << "Found red balloon!" << std::endl;
-            } else if(color == blue) {
-                std::cout << "Found blue balloon!" << std::endl;
-            }
-
         };
 
         // Circle all the candidate contours

@@ -1,5 +1,7 @@
+/* Author: Tucker Haydon */
 
 #include <vector>
+#include <Eigen/Eigenvalues> 
 
 #include "utility.h"
 #include "io.h"
@@ -29,33 +31,7 @@ TransformedMeasurement SigmaPointTransform::TransformMeasurement(
         Eigen::Matrix6d S2 = Eigen::Matrix6d().Zero();
         S2.topLeftCorner(3,3) = RpG;
         S2.bottomRightCorner(3,3) = R_att;
-
-        std::cout << S2 << std::endl << std::endl;
-
-        // Eigen::FullPivLU<Eigen::Matrix6d> lu(S2);
-        // Eigen::Matrix6d l = Eigen::Matrix6d::Identity();
-        // l.block<6,6>(0,0).triangularView<Eigen::StrictlyLower>() = lu.matrixLU();
-        // Eigen::Matrix6d u = lu.matrixLU().triangularView<Eigen::Upper>();
-        // Eigen::Matrix6d ll = lu.permutationP().inverse() * l;
-        // Eigen::Matrix6d uu = u * lu.permutationQ().inverse();
-        // std::cout << ll << std::endl << std::endl;
-        // std::cout << ll * uu << std::endl << std::endl;
-
-        Eigen::LDLT<Eigen::Matrix6d> ldlt(S2);
-        Eigen::Matrix6d l = ldlt.matrixL();
-        Eigen::Matrix6d u = ldlt.matrixU();
-        Eigen::Matrix6d d = ldlt.vectorD().asDiagonal();
-        Eigen::Transpositions<6, 6, int> p = ldlt.transpositionsP();
-        auto pt = p.transpose();
-
-        std::cout << l << std::endl << std::endl;
-        std::cout << d << std::endl << std::endl;
-        std::cout << u << std::endl << std::endl;
-        // std::cout << p * l * d * u * pt << std::endl << std::endl;
-
-        // std::cout << ldlt.transpositionsP().transpose() * ldlt.matrixL() * ldlt.vectorD() * ldlt.matrixU() * ldlt.transpositionsP() << std::endl << std::endl;
-
-        Eigen::Matrix6d S;
+        Eigen::Matrix6d S = S2.llt().matrixL();
 
         // Sigma points
         std::vector<Eigen::Vector6d> sigma_points;
@@ -85,7 +61,15 @@ TransformedMeasurement SigmaPointTransform::TransformMeasurement(
         }
 
         for(size_t i = 0; i < ns_; i++) {
-            const RawMeasurement raw_measurement{az, el, roll, rpG};
+            const RawMeasurement raw_measurement{
+                    sigma_points[i](3), 
+                    sigma_points[i](4), 
+                    sigma_points[i](5), 
+                    Eigen::Vector3d(
+                        sigma_points[i](0), 
+                        sigma_points[i](1), 
+                        sigma_points[i](2))};
+
             const ProcessedMeasurement transformed_measurement = TransformRawMeasurement(raw_measurement);
 
             const Eigen::Vector3d rciC = transformed_measurement.rciC;
@@ -113,7 +97,7 @@ TransformedMeasurement SigmaPointTransform::TransformMeasurement(
             * (transformed_sigma_points[0] - transformed_sigma_points_mean) 
             * (transformed_sigma_points[0] - transformed_sigma_points_mean).transpose();
 
-        for(size_t i = 0; i < ns_; i++) {
+        for(size_t i = 1; i < ns_; i++) {
             transformed_sigma_points_cov = transformed_sigma_points_cov 
                 +  Wci_ 
                 * (transformed_sigma_points[i] - transformed_sigma_points_mean) 

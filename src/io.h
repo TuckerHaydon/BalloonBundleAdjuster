@@ -99,7 +99,8 @@ inline std::map<std::string, MeasurementInfo> ParseMeasurementFile(const std::st
     
         // Covariance of primary
         for(int i = 0; i < 3; i++) {
-            for(int j = 0; j < i+1; j++) {
+            for(int j = 0; j < 3; j++) {
+                if(i > j) { continue; }
                 ss >> RpG(j, i);
                 RpG(i, j) = RpG(j, i);
             }
@@ -112,7 +113,8 @@ inline std::map<std::string, MeasurementInfo> ParseMeasurementFile(const std::st
 
         // Covariance of baseline
         for(int i = 0; i < 3; i++) {
-            for(int j = 0; j < i+1; j++) {
+            for(int j = 0; j < 3; j++) {
+                if(i > j) { continue; }
                 ss >> RbG(j, i);
                 RbG(i, j) = RbG(j, i);
             }
