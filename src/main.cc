@@ -48,11 +48,11 @@ int main(int argc, char** argv) {
         std::cout << image_name << std::endl;
         const TransformedMeasurement meas = SigmaPointTransform().TransformMeasurement(meas_info);
 
-        std::cout << pose_map[image_name].P << std::endl;
-        std::cout << std::endl;
-        std::cout << meas.P << std::endl;
-        std::cout << "============================" << std::endl;
-        // break;
+        // std::cout << pose_map[image_name].P << std::endl;
+        // std::cout << std::endl;
+        // std::cout << meas.P << std::endl;
+        // std::cout << "============================" << std::endl;
+        break;
     }
 
     return EXIT_SUCCESS;

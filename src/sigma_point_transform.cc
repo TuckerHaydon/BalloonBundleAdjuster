@@ -24,16 +24,38 @@ TransformedMeasurement SigmaPointTransform::TransformMeasurement(
         const Eigen::Vector6d measurement_mean = (Eigen::Vector6d() << rpG(0), rpG(1), rpG(2), az, el, roll).finished();
 
         // Sqrt of covariance
-        const Eigen::Matrix3d sqrt_R_att = Eigen::Vector3d(az_sigma, el_sigma, roll_sigma).asDiagonal();
-        // const Eigen::Matrix3d R_att = Eigen::Vector3d(az_sigma*az_sigma, el_sigma*el_sigma, roll_sigma*roll_sigma).asDiagonal();
-        const Eigen::Matrix3d L = Eigen::LLT<Eigen::Matrix3d>(RpG).matrixL(); 
-        Eigen::Matrix6d S = Eigen::Matrix6d().Zero();
-        S.topLeftCorner(3,3) = L;
-        S.bottomRightCorner(3,3) = sqrt_R_att;
+        // const Eigen::Matrix3d sqrt_R_att = Eigen::Vector3d(az_sigma, el_sigma, roll_sigma).asDiagonal();
+        const Eigen::Matrix3d R_att = Eigen::Vector3d(az_sigma*az_sigma, el_sigma*el_sigma, roll_sigma*roll_sigma).asDiagonal();
+        Eigen::Matrix6d S2 = Eigen::Matrix6d().Zero();
+        S2.topLeftCorner(3,3) = RpG;
+        S2.bottomRightCorner(3,3) = R_att;
 
-        // std::cout << RpG << std::endl << std::endl;
-        // std::cout << L * L.transpose() << std::endl << std::endl;
-        // Eigen::Matrix6d S = Eigen::Matrix6d().Zero();
+        std::cout << S2 << std::endl << std::endl;
+
+        // Eigen::FullPivLU<Eigen::Matrix6d> lu(S2);
+        // Eigen::Matrix6d l = Eigen::Matrix6d::Identity();
+        // l.block<6,6>(0,0).triangularView<Eigen::StrictlyLower>() = lu.matrixLU();
+        // Eigen::Matrix6d u = lu.matrixLU().triangularView<Eigen::Upper>();
+        // Eigen::Matrix6d ll = lu.permutationP().inverse() * l;
+        // Eigen::Matrix6d uu = u * lu.permutationQ().inverse();
+        // std::cout << ll << std::endl << std::endl;
+        // std::cout << ll * uu << std::endl << std::endl;
+
+        Eigen::LDLT<Eigen::Matrix6d> ldlt(S2);
+        Eigen::Matrix6d l = ldlt.matrixL();
+        Eigen::Matrix6d u = ldlt.matrixU();
+        Eigen::Matrix6d d = ldlt.vectorD().asDiagonal();
+        Eigen::Transpositions<6, 6, int> p = ldlt.transpositionsP();
+        auto pt = p.transpose();
+
+        std::cout << l << std::endl << std::endl;
+        std::cout << d << std::endl << std::endl;
+        std::cout << u << std::endl << std::endl;
+        // std::cout << p * l * d * u * pt << std::endl << std::endl;
+
+        // std::cout << ldlt.transpositionsP().transpose() * ldlt.matrixL() * ldlt.vectorD() * ldlt.matrixU() * ldlt.transpositionsP() << std::endl << std::endl;
+
+        Eigen::Matrix6d S;
 
         // Sigma points
         std::vector<Eigen::Vector6d> sigma_points;
