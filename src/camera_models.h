@@ -15,13 +15,13 @@ template <typename T>
 inline OpenCVCameraModel<T>::OpenCVCameraModel() 
     : fx_(T(sensor_params.fx)),
       fy_(T(sensor_params.fy)),
-      cx_(T(sensor_params.intrinsics[0])),
-      cy_(T(sensor_params.intrinsics[1])),
-      k1_(T(sensor_params.intrinsics[2])),
-      k2_(T(sensor_params.intrinsics[3])),
-      p1_(T(sensor_params.intrinsics[4])),
-      p2_(T(sensor_params.intrinsics[5])),
-      k3_(T(sensor_params.intrinsics[6]))
+      cx_(T(sensor_params.cx)),
+      cy_(T(sensor_params.cy)),
+      k1_(T(sensor_params.dist_coeffs.at<double>(0, 0))),
+      k2_(T(sensor_params.dist_coeffs.at<double>(0, 1))),
+      p1_(T(sensor_params.dist_coeffs.at<double>(0, 2))),
+      p2_(T(sensor_params.dist_coeffs.at<double>(0, 3))),
+      k3_(T(sensor_params.dist_coeffs.at<double>(0, 4)))
 {}
 
 // https://docs.opencv.org/3.0-beta/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html

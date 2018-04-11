@@ -1,26 +1,28 @@
-#include <iostream>
-#include <sys/time.h>
-#include <sstream>
 #include <opencv2/opencv.hpp>
 #include <fstream>
 #include <iomanip>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "callback.h"
 #include "sensor_params.h"
 
+typedef struct {
+    Color color;
+    std::vector< std::pair<cv::Scalar, cv::Scalar> > bounds; 
+} Filter;
 
+/*
+* Process a single image and return a vector of observations.  Observations are
+* defined by the struct BalloonInfo. Look how BalloonInfo is defined in
+* include/callback.h
+*/
 const std::vector<BalloonInfo> processImage(const cv::Mat& img) {
-    /* Sensor params in: sensorParams */
-    /* GPS solution in: gpsSolution */
+    /* Sensor params in: sensor_params */
+    /* Example: cv::Mat cameraMatrixMat = sensor_params.camera_matrix; */
+    /* Look at the available sensor params in include/sensor_params.h */
 
     /* Define what red and blue are */
-    typedef struct {
-        Color color;
-        std::vector< std::pair<cv::Scalar, cv::Scalar> > bounds; 
-    } Filter;
-
     const cv::Scalar redBoundLower1(155, 100, 100);
     const cv::Scalar redBoundUpper1(180, 255, 255);
     const cv::Scalar redBoundLower2(0, 100, 100);
@@ -40,11 +42,14 @@ const std::vector<BalloonInfo> processImage(const cv::Mat& img) {
 
     const std::vector<Filter> filters = {redFilter, blueFilter};
 
-
     // Crop the image
 	cv::Mat cp = img.clone();
-	cv::Rect ROI(0, 0, sensor_params.image_width-1, sensor_params.image_height-1);
-	cv::Mat frame = cp(ROI);
+	cv::Rect ROI(0, 0, 3840-1, 2160-1);
+	cv::Mat roi = cp(ROI);
+
+    // Undistort the image
+    cv::Mat frame;
+    cv::undistort(roi, frame, sensor_params.camera_matrix, sensor_params.dist_coeffs);
 
     // Image properties
     const uint16_t rows = frame.rows;
@@ -162,6 +167,13 @@ const std::vector<BalloonInfo> processImage(const cv::Mat& img) {
             info.balloonLocation = Eigen::Vector3d(centerHull.x, centerHull.y, 0);
             info.color = color;
             infoVec.push_back(info);
+
+            if(color == red) {
+                std::cout << "Found red balloon!" << std::endl;
+            } else if(color == blue) {
+                std::cout << "Found blue balloon!" << std::endl;
+            }
+
         };
 
         // Circle all the candidate contours

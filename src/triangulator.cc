@@ -136,8 +136,8 @@ void Triangulator::SolveRobust() {
                 const Eigen::Vector4d P2 = P.row(1);
                 const Eigen::Vector4d P3 = P.row(2);
 
-                const double x_tilde = pix(0) * sensor_params.pixel_size;
-                const double y_tilde = pix(1) * sensor_params.pixel_size;
+                const double x_tilde = pix(0);
+                const double y_tilde = pix(1);
 
                 H.row(2*counter)   = x_tilde * P3 - P1;
                 H.row(2*counter+1) = y_tilde * P3 - P2;

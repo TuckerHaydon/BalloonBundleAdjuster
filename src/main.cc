@@ -25,15 +25,17 @@ int main(int argc, char** argv) {
     // Load params
     sensor_params.image_width   = 3840;
     sensor_params.image_height  = 2160;
-    sensor_params.pixel_size    = 1.12e-6;
     sensor_params.fx            = 1691.0;
     sensor_params.fy            = 1697.0;
+    sensor_params.cx            = 1914.0;
+    sensor_params.cy            = 1074.0;
     sensor_params.stdev_feature = 50.0;
     sensor_params.RCB           = Eul2Rot321(-120.0 * M_PI/180.0, 0, -M_PI/2);
     sensor_params.rcB           = Eigen::Vector3d(0.017, 0, -0.09);
     sensor_params.riG           = Eigen::Vector3d(-742018.3187986395, -5462218.0363918105, 3198014.2988005267);
     sensor_params.sig_roll      = 5 * M_PI/180;
-    sensor_params.intrinsics    = {1914, 1074, -0.06117476, 0.11208021, -0.00043455, -0.00232441, -0.06783447};
+    sensor_params.camera_matrix = (cv::Mat1d(3, 3) << sensor_params.fx, 0, sensor_params.cx, 0, sensor_params.fy, sensor_params.cy, 0, 0, 1);
+    sensor_params.dist_coeffs = (cv::Mat1d(1, 5) << -0.06117476, 0.11208021, -0.00043455, -0.00232441, -0.06783447);
 
     // Parse info from text files
     std::map<std::string, MeasurementInfo> measurement_map = ParseMeasurementFile("../images/image_data_raw.txt");
